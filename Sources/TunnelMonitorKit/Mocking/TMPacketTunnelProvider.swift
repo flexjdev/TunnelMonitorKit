@@ -30,6 +30,8 @@ public protocol TMPacketTunnelProvider {
 
     init()
 
+    // TODO #10: Add support for mocking NEPacketTunnelFlow
+
     /// This configuration function is invoked when the tunnel is being started by a TMTunnelProviderManager. It must
     /// perform any set up required to perform its job, and call the completion handler with `nil` after configuration
     /// is finished and the tunnel is ready to start, or with a `TMTunnelConfigurationError` when an unrecoverable

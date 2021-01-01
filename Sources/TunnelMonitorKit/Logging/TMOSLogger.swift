@@ -13,6 +13,8 @@ import os.log
 /// application and network extension.
 public class TMBasicLogger: TMLogger {
 
+    // TODO #11: Add format and arguments log function to add support for access modifiers
+
     let targetPrefix = Bundle.main.bundlePath.hasSuffix(".appex") ? "TUN" : "APP"
     var minimumLogLevel: LogLevel = .info
 
@@ -32,6 +34,8 @@ public class TMBasicLogger: TMLogger {
 /// A TunnelMonitor Logger implementation, based on the system logger. Distinguishes logs originating from the host
 /// application and network extension.
 public class TMOSLogger: TMBasicLogger {
+
+    // TODO #11: Support OSLog log levels
 
     override public func log(_ level: LogLevel, _ message: String) {
         if level.rawValue >= minimumLogLevel.rawValue {
