@@ -2,10 +2,11 @@ name: Swift
 
 on:
   push:
-    branches: [ master ]
   pull_request:
     branches: [ master ]
-
+  schedule:
+    # Nightly builds at midnight
+    - cron: 0 0 * * *
 jobs:
   build:
 
