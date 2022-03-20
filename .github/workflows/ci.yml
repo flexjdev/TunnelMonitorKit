@@ -1,0 +1,42 @@
+name: Swift
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  schedule:
+    # Nightly builds at midnight
+    - cron: 0 0 * * *
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Build
+      run: swift build -v
+      
+    - name: Run tests
+      run: swift test -v --enable-code-coverage
+      
+    - name: Export environment variables
+      run: echo "::set-output name=CODE_COVERAGE_REPORT_PATH::$(dirname $(swift test --show-codecov-path))"
+      id: env
+      
+    - uses: sersoft-gmbh/swift-coverage-action@v2
+      id: convert-codecov-files
+      with:
+        search-paths: ${{ steps.env.outputs.CODE_COVERAGE_REPORT_PATH }}
+
+#     - uses: codecov/codecov-action@v2
+#       with:
+#         files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
+      
+    - name: Codecov
+      uses: codecov/codecov-action@v2.1.0
+      with:
+        files: ${{ join(fromJSON(steps.convert-codecov-files.outputs.files), ',') }}
+        verbose: true
