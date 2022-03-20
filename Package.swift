@@ -10,7 +10,7 @@ let package = Package(
         .library(
             name: "TunnelMonitorKit",
             targets: ["TunnelMonitorKit"]
-        ),
+        )
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -26,6 +26,6 @@ let package = Package(
         .testTarget(
             name: "TunnelMonitorKitTests",
             dependencies: ["TunnelMonitorKit"]
-        ),
+        )
     ]
 )
