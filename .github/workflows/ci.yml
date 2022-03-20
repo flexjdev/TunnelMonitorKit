@@ -23,11 +23,20 @@ jobs:
       run: swift test -v --enable-code-coverage
       
     - name: Export environment variables
-      run: echo "::set-output name=CODE_COVERAGE_REPORT_PATH::$(swift test --show-codecov-path)"
+      run: echo "::set-output name=CODE_COVERAGE_REPORT_PATH::$(dirname $(swift test --show-codecov-path))"
       id: env
+      
+    - uses: sersoft-gmbh/swift-coverage-action@v2
+      id: convert-codecov-files
+      with:
+        search-paths: ${{ steps.env.outputs.CODE_COVERAGE_REPORT_PATH }}
+
+#     - uses: codecov/codecov-action@v2
+#       with:
+#         files: ${{ join(fromJSON(steps.coverage-files.outputs.files), ',') }}
       
     - name: Codecov
       uses: codecov/codecov-action@v2.1.0
       with:
-        file: ${{ steps.env.outputs.CODE_COVERAGE_REPORT_PATH }}
+        files: ${{ join(fromJSON(steps.convert-codecov-files.outputs.files), ',') }}
         verbose: true
