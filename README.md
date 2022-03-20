@@ -1,6 +1,6 @@
 # TunnelMonitorKit
 
-![Swift build status badge](https://github.com/chrisjanusiewicz/TunnelMonitorKit/actions/workflows/swift.yml/badge.svg)
+![Build status badge](https://github.com/chrisjanusiewicz/TunnelMonitorKit/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/ChrisJanusiewicz/TunnelMonitorKit/branch/master/graph/badge.svg?token=SI8AY4N5PS)](https://codecov.io/gh/ChrisJanusiewicz/TunnelMonitorKit)
 [![MIT License badge](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
