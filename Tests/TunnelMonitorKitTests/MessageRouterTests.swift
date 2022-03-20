@@ -11,17 +11,51 @@ import XCTest
 
 final class MessageRouterTests: XCTestCase {
 
+    var router: MessageRouter!
+
+    var messageHandlerAInvoked: Bool!
+    var messageHandlerBInvoked: Bool!
+
+    var messageHandlerA: MessageHandler!
+    var messageHandlerB: MessageHandler!
+
     struct MessageTypeA: Codable { }
     struct MessageTypeB: Codable { }
 
+    override func setUp() {
+        router = MessageRouter()
+
+        messageHandlerAInvoked = false
+        messageHandlerBInvoked = false
+
+        messageHandlerA = { _, _ in self.messageHandlerAInvoked = true }
+        messageHandlerB = { _, _ in self.messageHandlerBInvoked = true }
+    }
+
+    func testRouterHandlersReturnsCorrectSizeArray() {
+        XCTAssertEqual(router.handlers(for: MessageTypeA.self).count, 0)
+
+        router.addHandler(messageHandlerA, for: MessageTypeA.self)
+        XCTAssertEqual(router.handlers(for: MessageTypeA.self).count, 1)
+
+        router.addHandler(messageHandlerB, for: MessageTypeA.self)
+        XCTAssertEqual(router.handlers(for: MessageTypeA.self).count, 2)
+    }
+
+    func testRouterHandlersRemovedForMessageType() {
+        XCTAssertEqual(router.handlers(for: MessageTypeA.self).count, 0)
+
+        router.addHandler(messageHandlerA, for: MessageTypeA.self)
+        router.addHandler(messageHandlerB, for: MessageTypeB.self)
+        XCTAssertEqual(router.handlers(for: MessageTypeA.self).count, 1)
+        XCTAssertEqual(router.handlers(for: MessageTypeB.self).count, 1)
+
+        router.removeHandlers(for: MessageTypeA.self)
+        XCTAssertEqual(router.handlers(for: MessageTypeA.self).count, 0)
+        XCTAssertEqual(router.handlers(for: MessageTypeB.self).count, 1)
+    }
+
     func testHandlerInvokedForRelatedMessageType() throws {
-        let router = MessageRouter()
-
-        var messageHandlerAInvoked = false
-        var messageHandlerBInvoked = false
-        let messageHandlerA: MessageHandler = { _, _ in messageHandlerAInvoked = true }
-        let messageHandlerB: MessageHandler = { _, _ in messageHandlerBInvoked = true }
-
         router.addHandler(messageHandlerA, for: MessageTypeA.self)
         router.addHandler(messageHandlerB, for: MessageTypeB.self)
 
@@ -30,34 +64,42 @@ final class MessageRouterTests: XCTestCase {
             content: try JSONEncoder().encode(MessageTypeA())
         )
 
-        let handlersInvoked = router.handle(message: message, completionHandler: nil)
+        let numHandlersInvoked = router.handle(message: message, completionHandler: nil)
 
-        XCTAssert(handlersInvoked == 1)
+        XCTAssertEqual(numHandlersInvoked, 1)
         XCTAssert(messageHandlerAInvoked)
-        XCTAssert(!messageHandlerBInvoked)
+        XCTAssertFalse(messageHandlerBInvoked)
     }
 
     func testMultipleHandlersInvokedForSingleMessageType() throws {
-        let router = MessageRouter()
-
-        var messageHandler1Invoked = false
-        var messageHandler2Invoked = false
-        let messageHandler1: MessageHandler = { _, _ in messageHandler1Invoked = true }
-        let messageHandler2: MessageHandler = { _, _ in messageHandler2Invoked = true }
-
-        router.addHandler(messageHandler1, for: MessageTypeA.self)
-        router.addHandler(messageHandler2, for: MessageTypeA.self)
+        router.addHandler(messageHandlerA, for: MessageTypeA.self)
+        router.addHandler(messageHandlerB, for: MessageTypeA.self)
 
         let message = MessageContainer(
             metatype: String(describing: MessageTypeA.self),
             content: try JSONEncoder().encode(MessageTypeA())
         )
 
-        let handlersInvoked = router.handle(message: message, completionHandler: nil)
+        let numHandlersInvoked = router.handle(message: message, completionHandler: nil)
 
-        XCTAssert(handlersInvoked == 2)
-        XCTAssert(messageHandler1Invoked)
-        XCTAssert(messageHandler2Invoked)
+        XCTAssertEqual(numHandlersInvoked, 2)
+        XCTAssert(messageHandlerAInvoked)
+        XCTAssert(messageHandlerBInvoked)
+    }
+
+    func testHandlerNotInvokedAfterBeingRemoved() throws {
+        router.addHandler(messageHandlerA, for: MessageTypeA.self)
+        router.removeHandlers(for: MessageTypeA.self)
+
+        let message = MessageContainer(
+            metatype: String(describing: MessageTypeA.self),
+            content: try JSONEncoder().encode(MessageTypeA())
+        )
+
+        let numHandlersInvoked = router.handle(message: message, completionHandler: nil)
+
+        XCTAssertEqual(numHandlersInvoked, 0)
+        XCTAssertFalse(messageHandlerAInvoked)
     }
 
 }
