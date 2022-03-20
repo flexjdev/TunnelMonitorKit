@@ -6,7 +6,7 @@
 //  Copyright © 2022 Chris Janusiewicz. Distributed under the MIT License.
 //
 
-public struct TunnelMonitorKit {
+public struct TunnelMonitor {
     public private(set) var text = "Hello, World!"
 
     public init() {
