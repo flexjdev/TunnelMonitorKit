@@ -14,10 +14,10 @@ typealias MessageHandler = ((Data?, ResponseCompletion) -> Void)
 /// Responsible for registering callbacks to handle receiving specific message types.
 class MessageRouter {
 
-    /// Mapping of a message Metatype's string representation to an array of handler functions
+    /// Mapping of a message Metatype's string representation to an array of handler functions.
     private var handlerMap: [String: [MessageHandler]] = [:]
 
-    /// Register a handler for the given message content type
+    /// Register a handler for the given message content type.
     /// - Parameters:
     ///   - handler: A block that handles the message and optionally replies using the response completion
     ///   - messageType: The message content type this handler should be invoked for
@@ -25,6 +25,21 @@ class MessageRouter {
         let metatypeString = String(describing: messageType)
         let handlers = handlerMap[metatypeString] ?? []
         handlerMap[metatypeString] = handlers + [handler]
+    }
+
+    /// Returns all message handlers currently associated with a message type.
+    /// - Parameter messageType: The message type to find handlers for
+    /// - Returns: All message handlers associated with the given message type
+    func handlers(for messageType: Codable.Type) -> [MessageHandler] {
+        let metatypeString = String(describing: messageType)
+        return handlerMap[metatypeString] ?? []
+    }
+
+    /// Removes all handlers for a particular message type.
+    /// - Parameter messageType: The message type to remove handlers for
+    func removeHandlers(for messageType: Codable.Type) {
+        let metatypeString = String(describing: messageType)
+        handlerMap[metatypeString] = []
     }
 
     /// Invokes all handlers associated with the content type of the given message
