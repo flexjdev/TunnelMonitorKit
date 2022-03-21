@@ -51,13 +51,13 @@ let router = MessageRouter()
 router.addHandler(stateRequestHandler, for: StateRequest.self)
 ```
 
-Actual message data will be received by the `NEPacketTunnelProvider` superclass through `handleAppMessage`.
+Actual message data will be received by the `NEPacketTunnelProvider` superclass through `handleAppMessage`, and it should be passed to the router, which will invoke the correct handler depending on the type of the message contents.
 The `completionHandler` parameter is used to send a response back to the host app - this is the `ResponseCompletion` part of each handler you define.
 
 ```swift
 override open func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)?) {
       let request = try! JSONDecoder().decode(MessageContainer.self, from: messageData)
-      _ = messageHandler.handle(message: request, completionHandler: handler)
+      _ = router.handle(message: request, completionHandler: handler)
 }
 ```
 
