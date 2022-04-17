@@ -24,6 +24,8 @@ This means the communication can only be reliably initiated by the host app - al
 
 # Usage
 
+## Logging
+
 # Dependencies
 
 # License

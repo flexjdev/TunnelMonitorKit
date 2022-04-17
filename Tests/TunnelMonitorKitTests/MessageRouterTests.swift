@@ -59,7 +59,7 @@ final class MessageRouterTests: XCTestCase {
         router.addHandler(messageHandlerA, for: MessageTypeA.self)
         router.addHandler(messageHandlerB, for: MessageTypeB.self)
 
-        let message = MessageContainer.make(message: MessageTypeA())!
+        let message = try MessageContainer.make(message: MessageTypeA())
 
         let numHandlersInvoked = router.handle(message: message, completionHandler: nil)
 
@@ -72,7 +72,7 @@ final class MessageRouterTests: XCTestCase {
         router.addHandler(messageHandlerA, for: MessageTypeA.self)
         router.addHandler(messageHandlerB, for: MessageTypeA.self)
 
-        let message = MessageContainer.make(message: MessageTypeA())!
+        let message = try MessageContainer.make(message: MessageTypeA())
 
         let numHandlersInvoked = router.handle(message: message, completionHandler: nil)
 
@@ -85,7 +85,7 @@ final class MessageRouterTests: XCTestCase {
         router.addHandler(messageHandlerA, for: MessageTypeA.self)
         router.removeHandlers(for: MessageTypeA.self)
 
-        let message = MessageContainer.make(message: MessageTypeA())!
+        let message = try MessageContainer.make(message: MessageTypeA())
 
         let numHandlersInvoked = router.handle(message: message, completionHandler: nil)
 

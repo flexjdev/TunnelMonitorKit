@@ -23,7 +23,7 @@ final class MessageContainerTests: XCTestCase {
     }
 
     func testCanDecodeMessageContainer() throws {
-        let message = MessageContainer.make(message: MessageTypeA())
+        let message = try MessageContainer.make(message: MessageTypeA())
 
         let messageData = try JSONEncoder().encode(message)
 
@@ -35,7 +35,7 @@ final class MessageContainerTests: XCTestCase {
     func testDecodedMessageContentsPreserved() throws {
         let messageContent = MessageTypeB(string: "test")
 
-        let message = MessageContainer.make(message: messageContent)
+        let message = try MessageContainer.make(message: messageContent)
 
         let messageData = try JSONEncoder().encode(message)
         let decodedMessage = try JSONDecoder().decode(MessageContainer.self, from: messageData)

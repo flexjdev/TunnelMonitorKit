@@ -50,38 +50,31 @@ open class TunnelMonitor {
             withTimeInterval: interval,
             repeats: true
         ) { [weak self] _ in
-            self?.sendMessage(message: requestBuilder()) { data in
-                self?.stateUpdateHandler?(data)
+            do {
+                try self?.sendMessage(message: requestBuilder()) { data in
+                    self?.stateUpdateHandler?(data)
+                }
+            } catch {
+                log(.error, "Error sending message: \(error)")
             }
         }
     }
 
     /// Stops requesting status updates
     public func stopMonitoring() {
-      pollTimer?.invalidate()
+        pollTimer?.invalidate()
     }
-
 
     /// Sends a generic message to the session.
     /// - Parameters:
     ///   - message: The message to be encoded and sent to the session.
     ///   - responseHandler: Completion block to be invoked when a response is received.
-    public func sendMessage<T: Codable>(message: T, responseHandler: ResponseCompletion) {
-        // TODO: throw errors instead of consecutive guards
-        guard let session = session else {
-            log(.warning, "Unable to send message to extension - session is nil")
-            return
-        }
-        guard session.status == .connected else {
-            log(.warning, "Unable to send message to extension - incorrect status: \(session.status)")
-            return
-        }
-        guard let container = MessageContainer.make(message: message) else {
-            log(.error, "Unable to send message to extension - error serializing contents of message: \(message)")
-            return
-        }
+    public func sendMessage<T: Codable>(message: T, responseHandler: ResponseCompletion) throws {
+        guard let session = session else { throw TMCommunicationError.invalidExtension }
+        guard session.status == .connected else { throw TMCommunicationError.invalidState(session.status) }
 
         do {
+            let container = try MessageContainer.make(message: message)
             let messageData = try JSONEncoder().encode(container)
             let sendDate = Date()
             try session.sendProviderMessage(messageData) { data in
@@ -90,8 +83,53 @@ open class TunnelMonitor {
                 responseHandler?(data)
             }
         } catch {
-            log(.error, "Failed to send message to extension: \(error)")
-            return
+            // Rethrow as TMCommunicationError wrapping the original error
+            if error is EncodingError {
+                throw TMCommunicationError.containerSerializationError(encodeError: error)
+            }
+            throw TMCommunicationError.sendFailure(error: error)
+        }
+    }
+}
+
+/// Contains information about why communication with tunnel failed
+public enum TMCommunicationError: Error {
+
+    /// The extension is not in a state in which it can be communicated with
+    case invalidState(NEVPNStatus)
+
+    /// The manager connection instance could not be cast to a NETunnelProviderSession or is nil
+    case invalidExtension
+
+    /// The response received was nil
+    case nilResponse
+
+    /// The response could not be decoded
+    case responseDecodingError(decodeError: Error)
+
+    /// The outgoing message could not be serialized
+    case containerSerializationError(encodeError: Error)
+
+    /// Generic error sending message
+    case sendFailure(error: Error)
+}
+
+extension TMCommunicationError: CustomStringConvertible {
+    /// Provides a meaningful description for each error type
+    public var description: String {
+        switch self {
+        case .invalidState(let status):
+            return "The extension is not in a state in which it can be communicated with: \(status)."
+        case .invalidExtension:
+            return "The extension is of incorrect type or nil - it could not be cast to a NETunnelProviderSession."
+        case .nilResponse:
+            return "The extension response was nil."
+        case .responseDecodingError(let error):
+            return "Failed to decode response: \(error)"
+        case .containerSerializationError(let error):
+            return "Failed to serialize outgoing message: \(error)"
+        case .sendFailure(let error):
+            return "Failed to send message: \(error)"
         }
     }
 }
