@@ -23,10 +23,7 @@ final class MessageContainerTests: XCTestCase {
     }
 
     func testCanDecodeMessageContainer() throws {
-        let message = MessageContainer(
-            metatype: String(describing: MessageTypeA.self),
-            content: try JSONEncoder().encode(MessageTypeA())
-        )
+        let message = MessageContainer.make(message: MessageTypeA())
 
         let messageData = try JSONEncoder().encode(message)
 
@@ -38,10 +35,7 @@ final class MessageContainerTests: XCTestCase {
     func testDecodedMessageContentsPreserved() throws {
         let messageContent = MessageTypeB(string: "test")
 
-        let message = MessageContainer(
-            metatype: String(describing: MessageTypeB.self),
-            content: try JSONEncoder().encode(messageContent)
-        )
+        let message = MessageContainer.make(message: messageContent)
 
         let messageData = try JSONEncoder().encode(message)
         let decodedMessage = try JSONDecoder().decode(MessageContainer.self, from: messageData)

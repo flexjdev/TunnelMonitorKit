@@ -21,7 +21,6 @@ public struct MessageContainer: Codable {
     /// Serialised representation of the message content.
     let content: Data?
 
-
     /// Initialises a Message container.
     /// - Parameters:
     ///   - metatype: The metatype of the message content
@@ -31,6 +30,18 @@ public struct MessageContainer: Codable {
         self.content = content
     }
 
+    /// Attempts to construct a generic message container with codable message contents.
+    /// - Returns: The generic nested message.
+    public static func make<T: Codable>(message: T) -> MessageContainer? {
+        do {
+            let content = try JSONEncoder().encode(message)
+            return MessageContainer(messageType: T.self, content: content)
+        } catch {
+            log(.error, "Unable to construct message of type \(T.self): \(error)")
+            return nil
+        }
+    }
+
     /// Attempts to decode a MessageContrainer from serialised data.
     /// - Parameter data: The data to deserialise
     /// - Returns: A decoded MessageContainer, or nil if the data was invalid
@@ -38,6 +49,7 @@ public struct MessageContainer: Codable {
         do {
             return try JSONDecoder().decode(self, from: data)
         } catch {
+            log(.error, "Unable to decode generic message container: \(error)")
             return nil
         }
     }

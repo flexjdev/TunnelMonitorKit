@@ -52,8 +52,9 @@ public class MessageRouter {
     ///   - message: The incoming message
     ///   - completionHandler: Responds to the message sender using the given data
     /// - Returns: Number of handlers invoked
-    public func handle(message: MessageContainer, completionHandler: ResponseCompletion) -> Int {
+    @discardableResult public func handle(message: MessageContainer, completionHandler: ResponseCompletion) -> Int {
         guard let handlers = handlerMap[message.metatype], !handlers.isEmpty else {
+            log(.warning, "No handlers registered for message type \(message.metatype)")
             return 0
         }
         handlers.forEach { handler in handler(message.content, completionHandler) }
