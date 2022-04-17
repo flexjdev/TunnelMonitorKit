@@ -44,11 +44,8 @@ open class TunnelMonitor {
         if let session = session {
             self.session = session
         }
-        pollTimer?.invalidate()
-        pollTimer = Timer.scheduledTimer(
-            withTimeInterval: interval,
-            repeats: true
-        ) { [weak self] _ in
+
+        let timerBlock = { [weak self] (_: Timer) in
             do {
                 try self?.sendMessage(message: requestBuilder()) { data in
                     self?.stateUpdateHandler?(data)
@@ -57,6 +54,17 @@ open class TunnelMonitor {
                 log(.error, "Error sending message: \(error)")
             }
         }
+
+        pollTimer?.invalidate()
+        // Schedule a timer to invoke the block repeatedly, and execute it once immediately
+        let timer = Timer.scheduledTimer(
+            withTimeInterval: interval,
+            repeats: true,
+            block: timerBlock
+        )
+        timerBlock(timer)
+
+        pollTimer = timer
     }
 
     /// Stops requesting status updates
