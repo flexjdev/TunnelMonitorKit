@@ -61,25 +61,33 @@ public class TMTunnelProviderSessionNative: TMTunnelProviderSession {
 public class TMTunnelProviderSessionMock: TMTunnelProviderSession {
 
     public let mockMessageRouter = MessageRouter()
-    public var statusToReturn = NEVPNStatus.invalid
+    private var currentStatus: NEVPNStatus = .invalid
+
+    public func setStatus(_ status: NEVPNStatus) {
+        currentStatus = status
+    }
 
     override public var status: NEVPNStatus {
-        return statusToReturn
+        return currentStatus
     }
 
     override public func stopTunnel() {
-        statusToReturn = NEVPNStatus.disconnected
+        currentStatus = NEVPNStatus.disconnected
     }
 
     override public func startTunnel(options: [String: Any]?) throws {
-        statusToReturn = NEVPNStatus.connected
+        currentStatus = NEVPNStatus.connected
     }
 
     override public func sendProviderMessage(_ message: Data, responseHandler: ResponseCompletion) throws {
-        guard
-            statusToReturn == .connected,
-            let messageContainer = MessageContainer.decode(from: message)
-        else { return }
+        guard currentStatus == .connected else {
+            log(.warning, "Mock message not sent: incorrect session state: \(currentStatus)")
+            return
+        }
+        guard let messageContainer = MessageContainer.decode(from: message) else {
+            log(.warning, "Mock message cannot be decoded")
+            return
+        }
         mockMessageRouter.handle(message: messageContainer) { data in
             responseHandler?(data)
         }
