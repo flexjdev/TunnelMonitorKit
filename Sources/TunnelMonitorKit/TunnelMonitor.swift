@@ -8,7 +8,6 @@
 
 import Foundation
 import NetworkExtension
-import UIKit
 
 /// Responsible for communication with the an NEPacketTunnelProvider or NEAppProxyProvider. Continuously sends status
 /// update requests to the network extension, such that the extension can use these requests to notify the host app of

@@ -11,16 +11,18 @@ import Foundation
 
 /// A TunnelMonitor Logger implementation, based on the system logger. Distinguishes logs originating from the host
 /// application and network extension.
-class TMOSLogger: TMLogger {
+public class TMOSLogger: TMLogger {
 
     private let targetPrefix = Bundle.main.bundlePath.hasSuffix(".appex") ? "TUN" : "APP"
     private var minimumLogLevel: LogLevel = .info
 
-    func setLogLevel(_ level: LogLevel) {
+    public init() { }
+
+    public func setLogLevel(_ level: LogLevel) {
         minimumLogLevel = level
     }
 
-    func log(_ level: LogLevel, _ message: String) {
+    public func log(_ level: LogLevel, _ message: String) {
         if level.rawValue >= minimumLogLevel.rawValue {
             os_log("%s", "[TM:\(targetPrefix)] \(level.description): \(message)")
         }
