@@ -61,6 +61,19 @@ override open func handleAppMessage(_ messageData: Data, completionHandler: ((Da
 }
 ```
 
+## Logging
+
+For debugging purposes, logging can be enabled by appending an instance of `TMLogger` to `TunnelMonitorKit.loggers`.
+`TMLogger` is a protocol which can be implemented by custom logger implementations based on existing logging frameworks.
+`TMOSLogger` is a sample implementation based on the unified system logger.
+It also distinguishes logs originating from the host application and network extension.
+
+```swift
+let logger = TMOSLogger()
+logger.setLogLevel(.warning)
+TunnelMonitorKit.loggers.append(logger)
+```
+
 # Dependencies
 
 Distributed through Swift Package Manager. No external dependencies at this point in time.
