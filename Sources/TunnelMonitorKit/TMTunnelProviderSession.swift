@@ -81,15 +81,15 @@ public class TMTunnelProviderSessionMock: TMTunnelProviderSession {
 
     override public func sendProviderMessage(_ message: Data, responseHandler: ResponseCompletion) throws {
         guard currentStatus == .connected else {
-            log(.warning, "Mock message not sent: incorrect session state: \(currentStatus)")
-            return
+            throw TMCommunicationError.invalidState(currentStatus)
         }
-        guard let messageContainer = MessageContainer.decode(from: message) else {
-            log(.warning, "Mock message cannot be decoded")
-            return
-        }
-        mockMessageRouter.handle(message: messageContainer) { data in
-            responseHandler?(data)
+        do {
+            let messageContainer = try JSONDecoder().decode(MessageContainer.self, from: message)
+            mockMessageRouter.handle(message: messageContainer) { data in
+                responseHandler?(data)
+            }
+        } catch {
+            throw TMCommunicationError.responseDecodingError(decodeError: error)
         }
     }
 
