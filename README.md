@@ -3,7 +3,7 @@
 ![Build status badge](https://github.com/chrisjanusiewicz/TunnelMonitorKit/actions/workflows/ci.yml/badge.svg)
 [![codecov](https://codecov.io/gh/ChrisJanusiewicz/TunnelMonitorKit/branch/master/graph/badge.svg?token=SI8AY4N5PS)](https://codecov.io/gh/ChrisJanusiewicz/TunnelMonitorKit)
 [![MIT License badge](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Swift Package Manager badge](https://img.shields.io/badge/Swift_Package_Manager-compatible-blue?style=flat-square)
+![Swift Package Manager badge](https://img.shields.io/badge/Swift_Package_Manager-compatible-blue)
 
 TunnelMonitorKit is a Swift package designed to streamline IPC, for example for an App's communication with its `NEPacketTunnelProvider` network extension.
 
