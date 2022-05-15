@@ -35,7 +35,7 @@ public class TMOSLogger: TMBasicLogger {
 
     override public func log(_ level: LogLevel, _ message: String) {
         if level.rawValue >= minimumLogLevel.rawValue {
-            os_log("%s", "[TM:\(targetPrefix)] \(level.description): \(message)")
+            os_log("%{public}s", "[TM:\(targetPrefix)] \(level.description): \(message)")
         }
     }
 }

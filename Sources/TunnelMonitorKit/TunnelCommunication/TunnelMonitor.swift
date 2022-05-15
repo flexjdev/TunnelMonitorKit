@@ -42,7 +42,6 @@ open class TunnelMonitor {
 
         let queryBlock: (Timer) -> Void = { _ in
             self.send(message: requestBuilder()) { (result: Result<U, TMCommunicationError>) in
-                print("query block: \(result)")
                 handler(result)
             }
         }

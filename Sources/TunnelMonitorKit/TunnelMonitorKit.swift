@@ -9,6 +9,7 @@
 import Foundation
 
 public class TunnelMonitorKit {
+
     /// Array of all registered loggers
     public static var loggers: [TMLogger] = []
 
