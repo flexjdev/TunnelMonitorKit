@@ -26,7 +26,7 @@ import NetworkExtension
 /// The Packet Tunnel target must define a `TMPacketTunnelProviderNative` subclass constrained to an implementation of
 /// the `TMPacketTunnelProvider` protocol, with the info.plist file pointing to it via the `NSExtensionPrincipalClass`
 /// entry.
-public protocol TMPacketTunnelProvider: AnyObject {
+public protocol TMPacketTunnelProvider {
 
     init()
 
@@ -174,114 +174,4 @@ open class TMPacketTunnelProviderNative<TunnelProviderImplementation: TMPacketTu
     override public func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {
         provider.handleAppMessage(messageData, completionHandler: completionHandler)
     }
-}
-
-public class TMTunnelProviderManagerFactory {
-
-    public static func loadProviderManager<UserConfiguration: Codable, ProviderType: TMPacketTunnelProvider>(
-        ofType type: ProviderType.Type,
-        mocked: Bool,
-        tunnelSettings: TMTunnelSettings,
-        networkSettings: TMNetworkSettings,
-        userConfiguration: UserConfiguration,
-        completionHandler: @escaping (TMTunnelProviderManager?) -> Void
-    ) {
-        if mocked {
-            do {
-                let mockedManager = try createMockProviderManager(
-                    ofType: type,
-                    networkSettings: networkSettings,
-                    userConfiguration: userConfiguration
-                )
-                completionHandler(mockedManager)
-            } catch {
-                completionHandler(nil)
-            }
-        } else {
-            loadNativeProviderManager(
-                tunnelSettings: tunnelSettings,
-                networkSettings: networkSettings,
-                userConfiguration: userConfiguration
-            ) { providerManager in
-                guard let providerManager = providerManager else {
-                    completionHandler(nil)
-                    return
-                }
-                completionHandler(providerManager)
-            }
-        }
-    }
-
-    public static func createMockProviderManager<UserConfiguration: Codable, ProviderType: TMPacketTunnelProvider>(
-        ofType: ProviderType.Type,
-        networkSettings: TMNetworkSettings,
-        userConfiguration: UserConfiguration
-    ) throws -> TMMockTunnelProviderManager {
-        return try TMMockTunnelProviderManager(
-            provider: ProviderType(),
-            networkSettings: networkSettings,
-            userConfiguration: userConfiguration
-        )
-    }
-
-    public static func loadNativeProviderManager<UserConfiguration: Codable>(
-        tunnelSettings: TMTunnelSettings,
-        networkSettings: TMNetworkSettings,
-        userConfiguration: UserConfiguration,
-        completionHandler: @escaping (TMNativeTunnelProviderManager?) -> Void
-    ) {
-        /// Initialise VPNManager, which also saves/updates a tunnel configuration to the phone's VPN settings
-        NETunnelProviderManager.loadAllFromPreferences { (savedManagers, error) in
-            if let error = error {
-                log(.error, "Failed to load list of tunnel provider managers with error: \(error)")
-                completionHandler(nil)
-                return
-            }
-            guard let savedManager = savedManagers?.first else {
-                log(.error, "Failed to load")
-                completionHandler(nil)
-                return
-            }
-            savedManager.loadFromPreferences { (error) in
-                if let error = error {
-                    log(.error, "Failed to load tunnel provider manager: \(savedManager) error: \(error)")
-                    completionHandler(nil)
-                    return
-                }
-
-                let provider = NETunnelProviderProtocol()
-                provider.providerBundleIdentifier = tunnelSettings.tunnelBundleID
-
-                let encoder = JSONEncoder()
-                do {
-                    let networkSettingsData = try encoder.encode(networkSettings)
-                    let userConfigurationData = try encoder.encode(userConfiguration)
-                    let config: [String: Any] = [
-                        TMTunnelConfigurationKey.networkSettings.rawValue: networkSettingsData as Any,
-                        TMTunnelConfigurationKey.userConfiguration.rawValue: userConfigurationData as Any
-                    ]
-
-                    provider.providerConfiguration = config
-                    provider.serverAddress = networkSettings.tunnelRemoteAddress
-                    provider.disconnectOnSleep = tunnelSettings.disconnectOnSleep
-
-                    savedManager.localizedDescription = tunnelSettings.managerLocalizedDescription
-                    savedManager.protocolConfiguration = provider
-                    savedManager.isEnabled = true
-
-                    savedManager.saveToPreferences { error in
-                        if let error = error {
-                            log(.error, "Failed to save tunnel provider manager: \(savedManager) error: \(error)")
-                        }
-                        let nativeManager = TMNativeTunnelProviderManager(provider: savedManager)
-                        completionHandler(nativeManager)
-                    }
-                } catch {
-                    log(.error, "Failed to encode tunnel configuration data structures \(error)")
-                    completionHandler(nil)
-                }
-            }
-        }
-    }
-
 }
