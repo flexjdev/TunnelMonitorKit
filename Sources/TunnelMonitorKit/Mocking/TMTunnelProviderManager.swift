@@ -1,19 +1,23 @@
 //
 //  TMTunnelProviderManager.swift
-//  
+//  TunnelMonitorKit
 //
 //  Created by Chris J on 14/05/2022.
+//  Copyright © 2022 Chris Janusiewicz. Distributed under the MIT License.
 //
 
 import NetworkExtension
 import Foundation
 
+/// Defines events describing changes to the state of the tunnel provider, and the specific service it provides.
 public protocol TMTunnelProviderManagerDelegate: AnyObject {
 
+    /// Invoked whenever the tunnel provider state changes.
     func tunnelStateChanged(to state: NEVPNStatus)
 
-    /// Invoked every time the service state changes, including traffic and gateway changes
-    func serviceStateChanged<T: Codable>(manager: TMExtensionManager<T>, to state: T)
+    /// Invoked every time the service state changes. This contains information specific to the service provided by the
+    /// tunnel provider, represented by an instance the generic parameter `ServiceInfo`.`
+    func serviceStateChanged<ServiceInfo: Codable>(to state: ServiceInfo)
 }
 
 /// A base class allowing native and mock network extensions to be used interchangebly.
@@ -34,6 +38,38 @@ public class TMTunnelProviderManager {
     public var tunnelStatus: NEVPNStatus { fatalError("Please use Mock or Native TunelProviderManager.") }
 
     private var tunnelManager: NETunnelProviderManager { fatalError("please") }
+
+    public func send<Request: Codable, Response: Codable>(
+        message: Request,
+        responseHandler: @escaping (Result<Response, TMCommunicationError>) -> Void
+    ) {
+        tunnelMonitor.send(message: message, responseHandler: responseHandler)
+    }
+
+    public func send<Request: Codable>(message: Request) {
+        tunnelMonitor.send(message: message) { (_: Result<Data, TMCommunicationError>) in }
+    }
+
+    public func startMonitoring<ServiceInfoRequest: Codable, ServiceInfoResponse: Codable>(
+        withRequestBuilder requestBuilder: @escaping () -> ServiceInfoRequest,
+        responseHandler: @escaping (Result<ServiceInfoResponse, TMCommunicationError>) -> Void,
+        pollInterval: TimeInterval = 1.0
+    ) {
+        guard let session = session, session.status == .connected else {
+            log(.error, "Unable to monitor session - incorrect state")
+            return
+        }
+        tunnelMonitor.startMonitoring(
+            session: session,
+            withRequestBuilder: requestBuilder,
+            responseHandler: responseHandler,
+            pollInterval: pollInterval
+        )
+    }
+
+    public func stopMonitoring() {
+        tunnelMonitor.stopMonitoring()
+    }
 
 }
 

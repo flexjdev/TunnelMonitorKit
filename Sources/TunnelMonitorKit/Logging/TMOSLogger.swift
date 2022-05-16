@@ -1,6 +1,6 @@
 //
 //  TMOSLogger.swift
-//  
+//  TunnelMonitorKit
 //
 //  Created by Chris J on 23/03/2022.
 //  Copyright © 2022 Chris Janusiewicz. Distributed under the MIT License.

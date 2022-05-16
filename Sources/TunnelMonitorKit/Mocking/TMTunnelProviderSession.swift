@@ -1,7 +1,6 @@
 //
 //  TMTunnelProviderSession.swift
 //  TunnelMonitorKit
-//  
 //
 //  Created by Chris J on 17/04/2022.
 //  Copyright © 2022 Chris Janusiewicz. Distributed under the MIT License.

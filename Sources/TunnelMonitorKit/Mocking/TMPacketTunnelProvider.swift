@@ -94,7 +94,8 @@ public protocol TMPacketTunnelProvider: AnyObject {
 /// entry.
 ///
 /// ```
-/// open class HybridLinkNativeTunnelProvider: TMPacketTunnelProviderNative<HybridLinkTunnelProvider> { }
+/// public class MyTunnelProvider: TMPacketTunnelProvider { /* implementation of required methods */ }
+/// open class MyNativeTunnelProvider: TMPacketTunnelProviderNative<MyTunnelProvider> { }
 /// ```
 open class TMPacketTunnelProviderNative<TunnelProviderImplementation: TMPacketTunnelProvider>: NEPacketTunnelProvider {
 

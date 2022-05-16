@@ -1,8 +1,9 @@
 //
 //  NEProviderStopReason+Extension.swift
-//  HybridLinkV3
+//  TunnelMonitorKit
 //
 //  Created by Chris J on 13/08/2021.
+//  Copyright © 2022 Chris Janusiewicz. Distributed under the MIT License.
 //
 
 import NetworkExtension
