@@ -59,7 +59,6 @@ public class TMTunnelProviderManager {
         tunnelMonitor.send(message: message, responseHandler: responseHandler)
     }
 
-
     /// Sends a message request to the tunnel provider, ignoring any response that is returned.
     ///
     /// Use `send(_: Request, _: @escaping (Result<Response, TMCommunicationError>) -> Void)` if you want to decode the

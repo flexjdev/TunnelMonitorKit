@@ -89,7 +89,7 @@ public protocol TMPacketTunnelProvider {
 
 /// A real/native packet tunnel provider.
 ///
-/// You must subclass this class, constraining the `TunnelProviderImplementation` to your implementation of the
+/// You must subclass this class, constraining the `TunnelProvider` to your implementation of the
 /// `TMPacketTunnelProvider` protocol, with the info.plist file pointing to it via the `NSExtensionPrincipalClass`
 /// entry.
 ///
@@ -97,12 +97,12 @@ public protocol TMPacketTunnelProvider {
 /// public class MyTunnelProvider: TMPacketTunnelProvider { /* implementation of required methods */ }
 /// open class MyNativeTunnelProvider: TMPacketTunnelProviderNative<MyTunnelProvider> { }
 /// ```
-open class TMPacketTunnelProviderNative<TunnelProviderImplementation: TMPacketTunnelProvider>: NEPacketTunnelProvider {
+open class TMPacketTunnelProviderNative<TunnelProvider: TMPacketTunnelProvider>: NEPacketTunnelProvider {
 
-    let provider: TunnelProviderImplementation
+    let provider: TunnelProvider
 
     override public required init() {
-        provider = TunnelProviderImplementation()
+        provider = TunnelProvider()
         super.init()
     }
 
@@ -148,7 +148,10 @@ open class TMPacketTunnelProviderNative<TunnelProviderImplementation: TMPacketTu
 
     }
 
-    override public func startTunnel(options: [String: NSObject]? = nil, completionHandler: @escaping (Error?) -> Void) {
+    override public func startTunnel(
+        options: [String: NSObject]? = nil,
+        completionHandler: @escaping (Error?) -> Void
+    ) {
         log(.info, "Configuring native packet tunnel provider...")
         configureProvider { error in
             if let error = error {
