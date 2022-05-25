@@ -26,6 +26,10 @@ final class TMTunnelProviderSessionMockTests: XCTestCase {
         return data
     }
 
+    override func setUp() {
+        TunnelMonitorKit.loggers = [TMBasicLogger()]
+    }
+
     func testReportsCorrectStatus() {
         let mockSession = TMTunnelProviderSessionMock()
 

@@ -42,7 +42,7 @@ public class TMTunnelProviderManagerFactory {
         userConfiguration: UserConfiguration,
         completionHandler: @escaping (TMNativeTunnelProviderManager?) -> Void
     ) {
-        /// Initialise VPNManager, which also saves/updates a tunnel configuration to the phone's VPN settings
+        // Initialise VPNManager, which also saves/updates a tunnel configuration to the phone's VPN settings
         NETunnelProviderManager.loadAllFromPreferences { (savedManagers, error) in
             if let error = error {
                 log(.error, "Failed to load list of tunnel provider managers with error: \(error)")

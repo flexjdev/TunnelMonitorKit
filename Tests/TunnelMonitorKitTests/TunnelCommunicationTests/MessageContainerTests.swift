@@ -45,4 +45,12 @@ final class MessageContainerTests: XCTestCase {
 
         XCTAssertEqual(messageContent, decodedContent)
     }
+
+    func testInvalidMessageContainerReturnsNil() {
+        let garbageData = Data()
+
+        let container = MessageContainer.decode(from: garbageData)
+
+        XCTAssertNil(container)
+    }
 }

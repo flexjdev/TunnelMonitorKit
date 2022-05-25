@@ -19,7 +19,7 @@ final class TMMockTunnelProviderManagerTests: XCTestCase {
     private var networkSettings: TMNetworkSettings {
         TMNetworkSettings(
             tunnelRemoteAddress: "1.2.3.4",
-            includedRoutes: "255.255.255.255", excludedRoutes: "0.0.0.0",
+            includedRoutes: "255.255.255.255:0.0.0.0", excludedRoutes: "0.0.0.0:0.0.0.0",
             tunnelAddress: "10.0.0.1", subnet: "255.255.255.0",
             dns: "8.8.8.8", mtu: 1024
         )
@@ -29,6 +29,7 @@ final class TMMockTunnelProviderManagerTests: XCTestCase {
 
     private struct Request: Codable { }
 
+    /// A mock provider implementation used to test the mock tunnel provider manager
     private class ProviderImplementation: TMPacketTunnelProvider {
 
         required init() {
@@ -49,7 +50,8 @@ final class TMMockTunnelProviderManagerTests: XCTestCase {
         }
 
         func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
-
+            log(.info, "Stopped tunnel provider with reason: \(reason)")
+            completionHandler()
         }
 
         func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)?) {
@@ -65,9 +67,21 @@ final class TMMockTunnelProviderManagerTests: XCTestCase {
         Self.appMessageHandlerInvocation = XCTestExpectation(description: "App message received")
     }
 
+    func testReturnsCorrectStatus() throws {
+        let mockProviderManager = try TMTunnelProviderManagerFactory.createMockProviderManager(
+            ofType: ProviderImplementation.self,
+            networkSettings: networkSettings,
+            userConfiguration: UserConfiguration()
+        )
+
+        XCTAssertNotEqual(mockProviderManager.tunnelStatus, .connected)
+        mockProviderManager.startTunnel()
+        XCTAssertEqual(mockProviderManager.tunnelStatus, .connected)
+    }
+
     func testConfigurationInvokedWhenStarted() {
-        let mockProviderManager = try? TMMockTunnelProviderManager(
-            provider: ProviderImplementation(),
+        let mockProviderManager = try? TMTunnelProviderManagerFactory.createMockProviderManager(
+            ofType: ProviderImplementation.self,
             networkSettings: networkSettings,
             userConfiguration: UserConfiguration()
         )
@@ -78,8 +92,8 @@ final class TMMockTunnelProviderManagerTests: XCTestCase {
     }
 
     func testAppMessageNotReceivedIfNotStarted() {
-        let mockProviderManager = try? TMMockTunnelProviderManager(
-            provider: ProviderImplementation(),
+        let mockProviderManager = try? TMTunnelProviderManagerFactory.createMockProviderManager(
+            ofType: ProviderImplementation.self,
             networkSettings: networkSettings,
             userConfiguration: UserConfiguration()
         )
@@ -92,14 +106,46 @@ final class TMMockTunnelProviderManagerTests: XCTestCase {
     }
 
     func testAppMessageReceived() {
-        let mockProviderManager = try? TMMockTunnelProviderManager(
-            provider: ProviderImplementation(),
+        let mockProviderManager = try? TMTunnelProviderManagerFactory.createMockProviderManager(
+            ofType: ProviderImplementation.self,
             networkSettings: networkSettings,
             userConfiguration: UserConfiguration()
         )
 
         mockProviderManager?.startTunnel()
         mockProviderManager?.send(message: "Hello")
+
+        wait(for: [Self.appMessageHandlerInvocation], timeout: 0.5)
+    }
+
+    func testMonitoringNotStartedIfTunnelNotStarted() throws {
+        let mockProviderManager = try TMTunnelProviderManagerFactory.createMockProviderManager(
+            ofType: ProviderImplementation.self,
+            networkSettings: networkSettings,
+            userConfiguration: UserConfiguration()
+        )
+
+        mockProviderManager.startMonitoring(
+            withRequestBuilder: { Request() },
+            responseHandler: { (_: Result<Data, TMCommunicationError>) in }
+        )
+
+        Self.appMessageHandlerInvocation.isInverted = true
+        wait(for: [Self.appMessageHandlerInvocation], timeout: 0.5)
+    }
+
+    func testMonitoringStartedSuccessfully() throws {
+        let mockProviderManager = try TMTunnelProviderManagerFactory.createMockProviderManager(
+            ofType: ProviderImplementation.self,
+            networkSettings: networkSettings,
+            userConfiguration: UserConfiguration()
+        )
+
+        mockProviderManager.startTunnel()
+        mockProviderManager.startMonitoring(
+            withRequestBuilder: { Request() },
+            responseHandler: { (_: Result<Data, TMCommunicationError>) in }
+        )
 
         wait(for: [Self.appMessageHandlerInvocation], timeout: 0.5)
     }

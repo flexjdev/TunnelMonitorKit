@@ -172,8 +172,8 @@ open class TMPacketTunnelProviderNative<TunnelProvider: TMPacketTunnelProvider>:
     }
 
     override public func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
+        log(.info, "Stopping tunnel provider with reason: \(reason)")
         provider.stopTunnel(with: reason, completionHandler: completionHandler)
-        log(.info, "stop")
     }
 
     override public func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)? = nil) {

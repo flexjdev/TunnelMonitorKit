@@ -28,36 +28,9 @@ extension NEProviderStopReason: CustomStringConvertible {
     case .userLogout: return "User Logout"
     case .userSwitch: return "User Switch"
     case .appUpdate: return "App Update"
-    case .connectionFailed: return "ConnectionFailed"
+    case .connectionFailed: return "Connection Failed"
     case .sleep: return "Sleep"
     default: return "Uknown"
-    }
-  }
-}
-
-extension NEProviderStopReason: CustomDebugStringConvertible {
-
-  /// A textual representation of this instance, suitable for debugging.
-  public var debugDescription: String {
-    switch self {
-    case .none: return "No specific reason."
-    case .userInitiated: return "The user stopped the provider extension."
-    case .providerFailed: return "The provider failed to function correctly."
-    case .noNetworkAvailable: return "No network connectivity is currently available."
-    case .unrecoverableNetworkChange: return "The device’s network connectivity changed."
-    case .providerDisabled: return "The provider was disabled."
-    case .authenticationCanceled: return "The authentication process was canceled."
-    case .configurationFailed: return "The configuration is invalid."
-    case .idleTimeout: return "The session timed out."
-    case .configurationDisabled: return "The configuration was disabled."
-    case .configurationRemoved: return "The configuration was removed."
-    case .superceded: return "The configuration was superceded by a higher-priority configuration."
-    case .userLogout: return "The user logged out."
-    case .userSwitch: return "The current console user changed."
-    case .appUpdate: return "App Update"
-    case .connectionFailed: return "The connection failed."
-    case .sleep: return "The configuration enabled disconnect on sleep and the device went to sleep."
-    default: return "Uknown stop reason."
     }
   }
 }

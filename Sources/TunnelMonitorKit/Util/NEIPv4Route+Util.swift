@@ -25,7 +25,7 @@ extension NEIPv4Route {
         guard
             let match = routeRegex.firstMatch(in: string, options: [], range: range),
             let address = match.getMatchedGroup(named: "address", in: string),
-            let subnet = match.getMatchedGroup(named: "address", in: string)
+            let subnet = match.getMatchedGroup(named: "subnet", in: string)
         else {
             log(.warning, "String \(string) is not a valid ip route of form a.b.c.d:w.x.y.z")
             return nil
