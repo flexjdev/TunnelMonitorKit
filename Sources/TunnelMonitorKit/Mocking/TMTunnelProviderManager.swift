@@ -164,6 +164,7 @@ public class TMMockTunnelProviderManager: TMTunnelProviderManager {
                     return
                 }
                 self.currentTunnelStatus = .connected
+                self.monitor.setSession(session: self.mockSession)
                 log(.info, "Mock packet tunnel provider successfully started")
             }
         }
