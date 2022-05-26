@@ -80,33 +80,33 @@ Firstly, instead of defining your network service logic by subclassing `NEPacket
 ```swift
 public class MyTunnelProvider: TMPacketTunnelProvider {
 
-        required init() {
-            // Peform any setup that doesn't require user configuration
-            // Register any necessary message handlers using a `MessageRouter` in order to take advantage of `TunnelMonitor` functionality
-        }
-
-        func configureTunnel(
-            userConfigurationData: Data?,
-            settingsApplicationBlock: @escaping (NETunnelNetworkSettings?, ((Error?) -> Void)?) -> Void,
-            completionHandler: @escaping (TMTunnelConfigurationError?) -> Void
-        ) {
-            // If special configuration is required, decode it from `userConfigurationData`.
-            // Call the completion handler once the tunnel has been configured.
-        }
-
-        func startTunnel(options: [String: NSObject]?, completionHandler: @escaping (Error?) -> Void) {
-            // Start the service (asynchronously if necessary) and call the completion handler when finished.
-        }
-
-        func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
-            // Perform any cleanup actions, stop the service and call the completion handler.
-        }
-
-        func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)?) {
-            // Decode the request from `messageData` and pass the request to a `MessageRouter` to respond using the correct message handler
-        }
-
+    required init() {
+        // Peform any setup that doesn't require user configuration
+        // Register any necessary message handlers using a `MessageRouter` in order to take advantage of `TunnelMonitor` functionality
     }
+
+    func configureTunnel(
+        userConfigurationData: Data?,
+        settingsApplicationBlock: @escaping (NETunnelNetworkSettings?, ((Error?) -> Void)?) -> Void,
+        completionHandler: @escaping (TMTunnelConfigurationError?) -> Void
+    ) {
+        // If special configuration is required, decode it from `userConfigurationData`.
+        // Call the completion handler once the tunnel has been configured.
+    }
+
+    func startTunnel(options: [String: NSObject]?, completionHandler: @escaping (Error?) -> Void) {
+        // Start the service (asynchronously if necessary) and call the completion handler when finished.
+    }
+
+    func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
+        // Perform any cleanup actions, stop the service and call the completion handler.
+    }
+
+    func handleAppMessage(_ messageData: Data, completionHandler: ((Data?) -> Void)?) {
+        // Decode the request from `messageData` and pass the request to a `MessageRouter` to respond using the correct message handler
+    }
+
+}
 ```
 
 You must then subclass `TMPacketTunnelProviderNative` constraining generic `TunnelProvider` to your implementation of the `TMPacketTunnelProvider` protocol.
@@ -116,6 +116,26 @@ open class MyNativeTunnelProvider: TMPacketTunnelProviderNative<MyTunnelProvider
 ```
 
 The Packet Tunnel target must still define a `TMPacketTunnelProviderNative` subclass constrained to an implementation of the `TMPacketTunnelProvider` protocol, with the info.plist file pointing to it via the `NSExtensionPrincipalClass` entry.
+
+### Starting Mocked/Native Tunnels
+
+Use `TMTunnelProviderManagerFactory` to instantiate/load mock and native tunnels.
+Compiler directives can be used to automatically force mocked tunnel providers to be created when building for simulator target environments.
+
+```swift
+func loadProviderManager<UserConfiguration: Codable, ProviderType: TMPacketTunnelProvider>(
+      ofType type: ProviderType.Type,
+      completionHandler: @escaping (TMTunnelProviderManager?) -> Void
+) {
+#if targetEnvironment(simulator)
+    completionHandler(try? TMTunnelProviderManagerFactory.createMockProviderManager(...))
+#else
+    TMTunnelProviderManagerFactory.loadNativeProviderManager(...) { providerManager in
+        completionHandler(providerManager)
+    }
+#endif
+}
+```
 
 ## Logging
 
@@ -132,8 +152,8 @@ TunnelMonitorKit.loggers.append(logger)
 
 # Dependencies
 
-Distributed through Swift Package Manager. No external dependencies at this point in time.
-
+Distributed through Swift Package Manager.
+No external dependencies at this point in time.
 
 # License
 
