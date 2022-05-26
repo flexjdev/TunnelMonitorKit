@@ -30,7 +30,7 @@ public class TMTunnelProviderManagerFactory {
         )
     }
 
-    /// Loads a native tunnel ptovider manager.
+    /// Loads a native tunnel provider manager.
     /// - Parameters:
     ///   - tunnelSettings: General tunnel settings.
     ///   - networkSettings: General network settings.

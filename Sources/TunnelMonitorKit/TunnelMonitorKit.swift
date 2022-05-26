@@ -20,7 +20,7 @@ public class TunnelMonitorKit {
 /// Convenience function that uses all registered loggers to output a message.
 /// - Parameters:
 ///   - level: The log level to output the message under.
-///   - message: The string message to
+///   - message: The string message to log out.
 func log(_ level: LogLevel, _ message: String) {
     TunnelMonitorKit.loggers.forEach { $0.log(level, message) }
 }
