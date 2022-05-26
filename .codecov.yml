@@ -1,0 +1,5 @@
+# Ignore untestable native packet tunnel provider logic
+ignore:
+  - "Sources/TunnelMonitorKit/Mocking/TMTunnelProviderManagerFactory.swift"
+  - "Sources/TunnelMonitorKit/Mocking/TMPacketTunnelProviderNative.swift"
+  - "Sources/TunnelMonitorKit/Mocking/TMNativeTunnelProviderManager.swift"

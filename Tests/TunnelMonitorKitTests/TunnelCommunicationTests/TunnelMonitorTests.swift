@@ -170,4 +170,28 @@ final class TunnelMonitorTests: XCTestCase {
         wait(for: [responseReceived], timeout: 1.0)
     }
 
+    // MARK: Error path tests
+
+    func testCorrectErrorWhenSessionSendInInvalidState() throws {
+        monitor.setSession(session: mockSession)
+
+        NEVPNStatus.allCases.forEach { state in
+            let errorExpectation = XCTestExpectation(description: "Tunnel monitor should return invalid state error")
+
+            mockSession.setStatus(state)
+            monitor.send(message: Request()) { (result: Result<Response, TMCommunicationError>) in
+                switch result {
+                case .success:
+                    XCTAssertEqual(state, .connected, "Send message not succeed when the session is in state \(state)")
+                case .failure(let error):
+                    guard case .invalidState(let errorState) = error else {
+                        return XCTFail("Expected invalid state error but got \(error)")
+                    }
+                    XCTAssertEqual(errorState, state)
+                }
+                errorExpectation.fulfill()
+            }
+            wait(for: [errorExpectation], timeout: 0.5)
+        }
+    }
 }

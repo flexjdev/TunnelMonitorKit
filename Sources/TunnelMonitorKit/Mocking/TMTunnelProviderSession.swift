@@ -1,7 +1,6 @@
 //
 //  TMTunnelProviderSession.swift
 //  TunnelMonitorKit
-//  
 //
 //  Created by Chris J on 17/04/2022.
 //  Copyright © 2022 Chris Janusiewicz. Distributed under the MIT License.
@@ -62,6 +61,11 @@ public class TMTunnelProviderSessionMock: TMTunnelProviderSession {
 
     public let mockMessageRouter = MessageRouter()
     private var currentStatus: NEVPNStatus = .invalid
+    private var provider: TMPacketTunnelProvider?
+
+    public func setProvider(_ provider: TMPacketTunnelProvider) {
+        self.provider = provider
+    }
 
     public func setStatus(_ status: NEVPNStatus) {
         currentStatus = status
@@ -84,6 +88,10 @@ public class TMTunnelProviderSessionMock: TMTunnelProviderSession {
             throw TMCommunicationError.invalidState(currentStatus)
         }
         do {
+            if let provider = provider {
+                provider.handleAppMessage(message, completionHandler: responseHandler)
+                return
+            }
             let messageContainer = try JSONDecoder().decode(MessageContainer.self, from: message)
             mockMessageRouter.handle(message: messageContainer) { data in
                 responseHandler?(data)

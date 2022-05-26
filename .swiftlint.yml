@@ -1,6 +1,7 @@
 disabled_rules:
   - identifier_name # Variable names with less than 3 characters don't warn
   - multiple_closures_with_trailing_closure # Needed for SwiftUI syntax
+  - todo
 
 opt_in_rules:
   - empty_count # Prefer .isEmpty for collections
@@ -10,3 +11,11 @@ opt_in_rules:
   - modifier_order # Set order of public, final, etc
   - toggle_bool # Prefer .toggle() over myBool = !myBool
 
+custom_rules:
+  todo_must_have_associated_issue:
+    included: ".*.swift"
+    name: "TODO Violation"
+    regex: "(TODO)(?!(\\s?#?[0-9]+))"
+    match_kinds: comment
+    message: "TODO descriptions must refer to a Github issue number, e.g. // TODO #5: stuff"
+    severity: warning

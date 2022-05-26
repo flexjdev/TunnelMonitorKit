@@ -6,8 +6,8 @@ import PackageDescription
 let package = Package(
     name: "TunnelMonitorKit",
     platforms: [
-        .iOS(.v10),
-        .macOS(.v10_12)
+        .iOS(.v11),
+        .macOS(.v10_13)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
